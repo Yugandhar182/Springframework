@@ -1,9 +1,15 @@
-FROM maven:3.5.2-jdk-7-alpine AS MAVEN_TOOL_CHAIN
-COPY pom.xml /tmp/
-COPY src /tmp/src/
-WORKDIR /tmp/
-WORKDIR /workspace
-FROM tomcat:7.0-jre7-alpine
-COPY --from=MAVEN_TOOL_CHAIN /tmp/target/wizard*.war $CATALINA_HOME/webapps/wizard.war
+#
+# Build stage
+#
+FROM maven:3.8.2-jdk-11 AS build
+COPY . .
+RUN mvn clean package -Pprod -DskipTests
 
-HEALTHCHECK --interval=1m --timeout=3s CMD wget --quiet --tries=1 --spider http://localhost:8080/wizard/ || exit 1
+#
+# Package stage
+#
+FROM openjdk:11-jdk-slim
+COPY --from=build /target/demo-0.0.1-SNAPSHOT.jar demo.jar
+# ENV PORT=8080
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","demo.jar"]
