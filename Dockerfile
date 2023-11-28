@@ -1,23 +1,9 @@
-# Use the official Maven image as a base image
-FROM maven:3.8.4-openjdk-11-slim AS builder
+FROM maven:3.5-jdk-8 AS build  
+COPY src /usr/src/app/src  
+COPY pom.xml /usr/src/app  
+RUN mvn -f /usr/src/app/pom.xml clean package
 
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the project files into the container
-COPY . .
-
-# Build the Maven project
-RUN mvn clean install -X
-
-# Use the official Tomcat image as a base image
-FROM tomcat:9.0.53-jdk11-openjdk-slim
-
-# Copy the war file built in the previous stage into the Tomcat webapps directory
-COPY --from=builder /app/target/your-web-app.war /usr/local/tomcat/webapps/
-
-# Expose the port on which Tomcat will run
-EXPOSE 8080
-
-# Start Tomcat
-CMD ["catalina.sh", "run"]
+FROM gcr.io/distroless/java  
+COPY --from=build /usr/src/app/target/helloworld-1.0.0-SNAPSHOT.jar /usr/app/helloworld-1.0.0-SNAPSHOT.jar  
+EXPOSE 8080  
+ENTRYPOINT ["java","-jar","/usr/app/helloworld-1.0.0-SNAPSHOT.jar"]  
