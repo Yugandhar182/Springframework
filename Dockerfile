@@ -1,14 +1,23 @@
-# Build stage
-FROM maven:3.8.5-openjdk-17 AS build
+# Use the official Maven image as a base image
+FROM maven:3.8.4-openjdk-11-slim AS builder
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the project files into the container
 COPY . .
-RUN mvn clean package -DskipTests
 
-# Final stage
-FROM openjdk:17.0.1-jdk-slim
-COPY --from=build /target/MVC-0.0.1-SNAPSHOT.jar MVC.jar
+# Build the Maven project
+RUN mvn clean install
 
-# Debugging information
-RUN ls -al /target
+# Use the official Tomcat image as a base image
+FROM tomcat:9.0.53-jdk11-openjdk-slim
 
+# Copy the war file built in the previous stage into the Tomcat webapps directory
+COPY --from=builder /app/target/your-web-app.war /usr/local/tomcat/webapps/
+
+# Expose the port on which Tomcat will run
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "MVC.jar"]
+
+# Start Tomcat
+CMD ["catalina.sh", "run"]
