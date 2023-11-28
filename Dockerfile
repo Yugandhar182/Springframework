@@ -1,9 +1,14 @@
-FROM tomcat:9.0
+# Use an official OpenJDK runtime as a base image
+FROM openjdk:8-jdk-alpine
 
-RUN rm -rf /usr/local/tomcat/webapps/*
+# Set the working directory in the container
+WORKDIR /app
 
-COPY *.war /usr/local/tomcat/webapps
+# Copy the application JAR file into the container
+COPY target/your-spring-mvc-app.jar /app/your-spring-mvc-app.jar
 
+# Expose the port that the application will run on
 EXPOSE 8080
 
-CMD ["catalina.sh", "run"]
+# Specify the command to run on container startup
+CMD ["java", "-jar", "your-spring-mvc-app.jar"]
