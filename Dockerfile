@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Build the Maven project
-RUN mvn clean install
+RUN mvn clean install -X
 
 # Use the official Tomcat image as a base image
 FROM tomcat:9.0.53-jdk11-openjdk-slim
