@@ -1,7 +1,9 @@
-FROM maven:3-eclipse-temurin-17 AS build
-COPY . .
-RUN mvn clean package -Pprod -DskipTests
-FROM eclipse-temurin:17-alpine
-COPY --from=build /target/backendaccountant-0.0.1-SNAPSHOT.jar demo.jar
+FROM tomcat:9.0
+
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+COPY *.war /usr/local/tomcat/webapps
+
 EXPOSE 8080
-ENTRYPOINT [“java”,“-jar”,“demo.jar”]
+
+CMD ["catalina.sh", "run"]
